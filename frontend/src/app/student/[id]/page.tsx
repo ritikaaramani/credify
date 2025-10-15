@@ -70,7 +70,10 @@ export default function StudentPage({ params }: { params: Promise<{ id: string }
       setLoading(false);
     }
   }, [studentId]);
-  };
+
+  useEffect(() => {
+    fetchStudentProfile();
+  }, [fetchStudentProfile]);
 
   if (loading) {
     return (
