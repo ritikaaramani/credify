@@ -31,12 +31,6 @@ export default function StudentPage({ params }: { params: Promise<{ id: string }
 
   const fetchStudentProfile = useCallback(async () => {
     try {
-
-  useEffect(() => {
-    fetchStudentProfile();
-  }, [fetchStudentProfile]);
-
-  try {
       // Fetch user details
       const { data: profile, error: userError } = await supabase
         .from('users')
