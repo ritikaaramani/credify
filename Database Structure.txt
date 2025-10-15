@@ -1,0 +1,65 @@
+Database Structure
+A. Core Tables
+Table Name	Purpose	Key Columns
+users	Stores learner/employee information	id (UUID), name, email, phone, role, created_at
+institutes	Stores training providers/universities	id, name, type, contact_info
+credentials	Each micro-credential earned	id, user_id, template_id, issue_date, status, verification_link
+credential_templates	Stores certificate templates	id, institute_id, template_file_url, title, placeholders
+template_placeholders	Defines where dynamic fields appear on templates	id, template_id, placeholder_name, x_coord, y_coord, font_size
+nsqf_levels	Maps credentials to NSQF levels	id, level, description
+credential_verifications	Logs verification attempts	id, credential_id, verifier_id, status, verified_on
+employers	Employer profiles with access rights	id, name, email, access_level
+employee_profiles	Aggregated learner profiles for employer view	id, user_id, profile_data (JSON), last_updated
+B. Buckets / Storage
+Bucket Name	Purpose
+certificates	Stores issued certificate PDFs for each user
+templates	Stores blank certificate templates (with placeholders)
+profile_pictures	Stores user profile images
+logs	System logs, verification history, and audit trails
+2. How the Employee App Accesses Profiles & Certificates
+
+Authentication
+
+Employees log in using email/SSO credentials.
+
+JWT or session token is issued for API access.
+
+Profile Retrieval
+
+Endpoint: GET /employee/profile
+
+Pulls data from employee_profiles table.
+
+Returns JSON with:
+
+Personal info (name, email, phone)
+
+Aggregated credential list (from credentials table, joined with credential_templates and nsqf_levels)
+
+Verification status and links (from credential_verifications)
+
+Certificate Access
+
+Endpoint: GET /employee/certificate/{credential_id}
+
+Backend checks the user’s user_id against credential_id.
+
+Retrieves the PDF from the certificates bucket.
+
+Serves the PDF or returns a pre-signed download URL for secure access.
+
+Employer Verification (Optional)
+
+Endpoint: GET /verification/{user_id}
+
+Returns a summary of credentials with verification statuses for trusted employers.
+
+3. Notes on Implementation
+
+Security: Use RLS (Row-Level Security) in the database to ensure employees only access their own credentials.
+
+Placeholders: Dynamically fill templates using template_placeholders and credential_templates to generate PDFs.
+
+Scalability: Certificates and templates are stored in object storage (bucket), while metadata stays in the database.
+
+NSQF Mapping: Helps employers and regulators see skill levels across micro-credentials.
