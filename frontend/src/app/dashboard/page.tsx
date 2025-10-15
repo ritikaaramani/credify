@@ -5,6 +5,11 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
+interface Credential {
+  student_id: string;
+  skills_acquired: string | string[];
+}
+
 interface Student {
   id: string;
   name: string;
@@ -12,6 +17,15 @@ interface Student {
   phone: string;
   created_at: string;
   skills: string[];
+}
+
+interface StudentResponse {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  created_at: string;
+  credentials: Credential[];
 }
 
 export default function DashboardPage() {
@@ -62,13 +76,13 @@ export default function DashboardPage() {
 
       // Create a map of student_id to their skills
       const studentSkillsMap = new Map<string, string[]>();
-      credentials?.forEach((cred: any) => {
+      credentials?.forEach((cred: Credential) => {
         if (cred.skills_acquired && cred.student_id) {
           // Convert string to array (split by comma if it contains commas)
-          let skills = [];
+          let skills: string[] = [];
           if (typeof cred.skills_acquired === 'string') {
             skills = cred.skills_acquired.includes(',') 
-              ? cred.skills_acquired.split(',').map((s: string) => s.trim())
+              ? cred.skills_acquired.split(',').map(s => s.trim())
               : [cred.skills_acquired.trim()];
           } else if (Array.isArray(cred.skills_acquired)) {
             skills = cred.skills_acquired;
@@ -83,17 +97,17 @@ export default function DashboardPage() {
 
       // Extract unique skills from all credentials
       const allSkills = new Set<string>();
-      credentials?.forEach((cred: any) => {
+      credentials?.forEach((cred: Credential) => {
         if (cred.skills_acquired) {
-          let skills = [];
+          let skills: string[] = [];
           if (typeof cred.skills_acquired === 'string') {
             skills = cred.skills_acquired.includes(',')
-              ? cred.skills_acquired.split(',').map((s: string) => s.trim())
+              ? cred.skills_acquired.split(',').map(s => s.trim())
               : [cred.skills_acquired.trim()];
           } else if (Array.isArray(cred.skills_acquired)) {
             skills = cred.skills_acquired;
           }
-          skills.forEach((skill: string) => allSkills.add(skill));
+          skills.forEach(skill => allSkills.add(skill));
         }
       });
       setAvailableSkills(Array.from(allSkills).sort());
