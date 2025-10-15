@@ -2,7 +2,14 @@
   "extends": "next/core-web-vitals",
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-unused-vars": "warn",
-    "react-hooks/exhaustive-deps": "warn"
-  }
+    "@typescript-eslint/no-unused-vars": ["warn", {
+      "varsIgnorePattern": "^_",
+      "argsIgnorePattern": "^_"
+    }],
+    "react-hooks/exhaustive-deps": ["warn", {
+      "enableDangerousAutofixThisMayCauseInfiniteLoops": true
+    }]
+  },
+  "ignorePatterns": ["*.config.js", "*.config.ts", "node_modules/"]
+}
 }

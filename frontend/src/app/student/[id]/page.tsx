@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
@@ -29,12 +29,14 @@ export default function StudentPage({ params }: { params: Promise<{ id: string }
   const router = useRouter();
   const { id: studentId } = use(params);
 
+  const fetchStudentProfile = useCallback(async () => {
+    try {
+
   useEffect(() => {
     fetchStudentProfile();
-  }, [studentId]);
+  }, [fetchStudentProfile]);
 
-  const fetchStudentProfile = async () => {
-    try {
+  try {
       // Fetch user details
       const { data: profile, error: userError } = await supabase
         .from('users')
@@ -64,11 +66,16 @@ export default function StudentPage({ params }: { params: Promise<{ id: string }
           credentials: credentials || []
         });
       }
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An error occurred while fetching student profile');
+      }
     } finally {
       setLoading(false);
     }
+  }, [studentId]);
   };
 
   if (loading) {
